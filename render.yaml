@@ -12,10 +12,7 @@ services:
       - key: DJANGO_SECRET_KEY
         generateValue: true
       - key: DJANGO_ALLOWED_HOSTS
-        fromService:
-          type: web
-          name: 1fi-api
-          property: host
+        value: onefi-1-cj60.onrender.com
       - key: CORS_ALLOWED_ORIGINS
         sync: false
       - key: MONGO_URI
