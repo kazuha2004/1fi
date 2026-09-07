@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: 1fi-api
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt && python manage.py migrate && python manage.py seed_products && python manage.py collectstatic --no-input
+    startCommand: gunicorn config.wsgi:application
+    healthCheckPath: /api/products/
+    envVars:
+      - key: DJANGO_DEBUG
+        value: "False"
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DJANGO_ALLOWED_HOSTS
+        fromService:
+          type: web
+          name: 1fi-api
+          property: host
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
+      - key: DATABASE_URL
+        fromDatabase:
+          name: 1fi-db
+          property: connectionString
+
+databases:
+  - name: 1fi-db
