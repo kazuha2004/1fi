@@ -7,7 +7,7 @@ This is the Django backend for the 1Fi internship assignment demo. It provides p
 - Product catalog API
 - Dynamic product detail and variant loading
 - EMI plan retrieval for order selection
-- SQLite database for local development
+- MongoDB Atlas database for product data
 - Seeded demo data for marketplace products
 
 ## Tech stack
@@ -15,7 +15,7 @@ This is the Django backend for the 1Fi internship assignment demo. It provides p
 - Python 3.12+
 - Django 6.1+
 - Django REST Framework
-- SQLite
+- MongoDB Atlas via PyMongo
 
 ## Run backend
 
@@ -29,6 +29,8 @@ python manage.py seed_products
 python manage.py runserver 0.0.0.0:8000
 ```
 
+Before seeding or serving the API, set `MONGO_URI` and optionally `MONGO_DB_NAME`. Copy `.env.example` to your environment and paste your MongoDB Atlas connection string into `MONGO_URI`.
+
 ## API endpoints
 
 - `GET /api/products/`
@@ -38,7 +40,7 @@ python manage.py runserver 0.0.0.0:8000
 
 ## Sample data
 
-The database is seeded with six demo products including:
+MongoDB is seeded with six demo products including:
 
 - Apple iPhone 16
 - Samsung Galaxy S25

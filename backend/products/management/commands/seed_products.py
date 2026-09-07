@@ -1,8 +1,9 @@
 from decimal import Decimal
+from datetime import datetime, timezone
 
 from django.core.management.base import BaseCommand
 
-from products.models import EMIPlan, Product, ProductVariant
+from products.mongo import products_collection
 
 
 PRODUCT_SEED = [
@@ -133,28 +134,42 @@ class Command(BaseCommand):
     help = "Seed product, variant, and EMI data for the 1Fi marketplace demo"
 
     def handle(self, *args, **options):
-        for product_data in PRODUCT_SEED:
-            product, _ = Product.objects.update_or_create(
-                slug=product_data["slug"],
-                defaults={
-                    "name": product_data["name"],
-                    "description": product_data["description"],
-                    "image": product_data["image"],
-                    "price": product_data["price"],
-                    "category": product_data["category"],
-                    "brand": product_data["brand"],
-                },
-            )
+        now = datetime.now(timezone.utc).isoformat()
+        documents = []
+        for product_id, product_data in enumerate(PRODUCT_SEED, start=1):
+            documents.append({
+                "id": product_id,
+                "name": product_data["name"],
+                "slug": product_data["slug"],
+                "description": product_data["description"],
+                "image": product_data["image"],
+                "price": float(product_data["price"]),
+                "category": product_data["category"],
+                "brand": product_data["brand"],
+                "created_at": now,
+                "variants": [
+                    {
+                        "id": index,
+                        "name": variant["name"],
+                        "value": variant["value"],
+                        "additional_price": float(variant["additional_price"]),
+                    }
+                    for index, variant in enumerate(product_data["variants"], start=1)
+                ],
+                "emi_plans": [
+                    {
+                        "id": index,
+                        "tenure_months": plan["tenure_months"],
+                        "monthly_amount": float(plan["monthly_amount"]),
+                        "interest_rate": float(plan["interest_rate"]),
+                        "is_no_cost_emi": plan["is_no_cost_emi"],
+                    }
+                    for index, plan in enumerate(product_data["emi_plans"], start=1)
+                ],
+            })
 
-            product.variants.all().delete()
-            for variant_data in product_data["variants"]:
-                ProductVariant.objects.create(
-                    product=product,
-                    **variant_data,
-                )
+        collection = products_collection()
+        collection.delete_many({})
+        collection.insert_many(documents)
 
-            product.emi_plans.all().delete()
-            for emi_data in product_data["emi_plans"]:
-                EMIPlan.objects.create(product=product, **emi_data)
-
-        self.stdout.write(self.style.SUCCESS("Seeded 6 marketplace products."))
+        self.stdout.write(self.style.SUCCESS("Seeded 6 marketplace products in MongoDB."))

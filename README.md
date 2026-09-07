@@ -56,7 +56,7 @@ Use the included `render.yaml` as a Blueprint. It creates the Django web service
 CORS_ALLOWED_ORIGINS=https://<your-vercel-project>.vercel.app
 ```
 
-Render generates `DJANGO_SECRET_KEY` and supplies `DATABASE_URL` from PostgreSQL.
+Render generates `DJANGO_SECRET_KEY`; add your MongoDB Atlas connection string as `MONGO_URI`.
 
 ## How to run backend
 
